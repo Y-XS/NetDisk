@@ -4,26 +4,26 @@
 #include<exception>
 #include<semaphore.h>
 //信号量
-class sem{
+class Sem{
 public:
-    sem(){
+    Sem(){
         if(sem_init(&m_sem,0,0)!=0)
             throw std::exception();
     }
-    ~sem(){sem_destroy(&m_sem);}
+    ~Sem(){sem_destroy(&m_sem);}
     bool wait(){return sem_wait(&m_sem)==0;}
     bool post(){return sem_post(&m_sem)==0;}
 private:
     sem_t m_sem;
 };
 //互斥锁
-class locker{
+class Locker{
 public:
-    locker(){
+    Locker(){
         if(pthread_mutex_init(&m_mutex,NULL) != 0)
             throw std::exception();
     }
-    ~locker(){pthread_mutex_destroy(&m_mutex);}
+    ~Locker(){pthread_mutex_destroy(&m_mutex);}
     bool lock(){
         return pthread_mutex_lock(&m_mutex) == 0;
     }
@@ -34,9 +34,9 @@ private:
     pthread_mutex_t m_mutex;
 };
 //条件变量
-class cond{
+class Cond{
 public:
-    cond(){
+    Cond(){
         if(pthread_mutex_init(&m_mutex,NULL) != 0)
             throw std::exception();
         if(pthread_cond_init(&m_cond,NULL) != 0){
@@ -44,7 +44,7 @@ public:
             throw std::exception();
         }
     }
-    ~cond(){
+    ~Cond(){
         pthread_mutex_destroy(&m_mutex);
         pthread_cond_destroy(&m_cond);
     }

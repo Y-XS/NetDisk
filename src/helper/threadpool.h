@@ -5,18 +5,18 @@
 #include"locker.h"
 
 template<typename T>
-class threadpool{
+class ThreadPool{
 public:
-    threadpool(int thread_num=8,int max_requests=10000);
-    ~threadpool();
+    ThreadPool(int thread_num=8,int max_requests=10000);
+    ~ThreadPool();
     bool append(T* request);
 private:
     int m_thread_num;
     int m_max_requests;
     pthread_t* m_threads;
     std::list<T> m_work_queue;
-    locker m_queue_locker;
-    sem m_queue_stat;
+    Locker m_queue_locker;
+    Sem m_queue_stat;
     bool m_stop;
     //工作线程业务函数
     static void* _worker(void* arg);
@@ -24,7 +24,7 @@ private:
 };
 
 template<typename T>
-threadpool<T>::threadpool(int thread_num,int max_requests)
+ThreadPool<T>::ThreadPool(int thread_num,int max_requests)
     :m_thread_num(thread_num),m_max_requests(max_requests),m_stop(false),m_threads(NULL){
     if((thread_num<=0)||(max_requests<=0))
         throw std::exception();
@@ -41,12 +41,12 @@ threadpool<T>::threadpool(int thread_num,int max_requests)
     }
 }
 template<typename T>
-threadpool<T>::~threadpool(){
+ThreadPool<T>::~ThreadPool(){
     delete[] m_threads;
     m_stop = true;
 }
 template<typename T>
-bool threadpool<T>::append(T* request){
+bool ThreadPool<T>::append(T* request){
     m_queue_locker.lock();
     if(m_work_queue.size()>m_max_requests){
         m_queue_locker.unlock();
@@ -58,13 +58,13 @@ bool threadpool<T>::append(T* request){
     return true;
 }
 template<typename T>
-void* threadpool<T>::_worker(void* arg){
-    threadpool* pool = (threadpool*)arg;
+void* ThreadPool<T>::_worker(void* arg){
+    ThreadPool* pool = (ThreadPool*)arg;
     pool->_run();
     return pool;
 }
 template<typename T>
-void threadpool<T>::_run(){
+void ThreadPool<T>::_run(){
     while(!m_stop){
         m_queue_stat.wait();
         m_queue_locker.lock();

@@ -8,9 +8,10 @@
 
 //test
 #include"loger.h"
+#include<memory>
 int main(){
-    Loger loger(Loger::TARGET_TERMINAL,Loger::DEBUG,"../logs");
-    loger.Debug("logger test");
+    std::shared_ptr<Loger> loger = make_shared<Loger>(Loger::getInstance());
+    loger->Debug("logger test");
     return 0;
 }
 

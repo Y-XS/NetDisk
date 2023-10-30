@@ -9,11 +9,12 @@ using namespace std;
 
 class Loger{
 public:
+    static Loger* getInstance(){return m_instance;}
     enum LOG_LEVEL{
         TRACE,
         DEBUG,
-        INFORMATION,
-        WARNING,
+        INFO,
+        WARN,
         ERROR,
         FATAL
     };
@@ -23,12 +24,12 @@ public:
         TARGET_FILE_AND_TERMINAL
     };
     Loger(){}
-    Loger(LOG_TARGET target, LOG_LEVEL level, const char* logFloder, int logKeepDays=10);
+    Loger(LOG_TARGET target, const char* logFloder, int logKeepDays=30);
     ~Loger();
 
     void Trace(const string &text);
     void Debug(const string &text);
-    void Information(const string &text);
+    void Info(const string &text);
     void Warn(const string &text);
     void Error(const string &text);
     void Fatal(const string &text);
@@ -36,6 +37,7 @@ public:
     void test();
 
 private:
+    static Loger* m_instance;
     const size_t maxFolderLen = 256;
     const int maxFileNameLen = 64;
     char m_logFolder[256];
@@ -43,7 +45,6 @@ private:
     FILE* m_file;
     ofstream m_outfile;
     LOG_TARGET m_target;
-    LOG_LEVEL m_level;
     int m_logKeepDays;
     
     string _GetFormatTime();

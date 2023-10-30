@@ -2,8 +2,9 @@
 #include<string.h>
 #include<vector>
 
-Loger::Loger(LOG_TARGET target, LOG_LEVEL level, const char *logFloder,int logKeepDays)
-    :m_file(NULL),m_target(target),m_level(level),m_logKeepDays(logKeepDays){
+Loger::Loger(LOG_TARGET target, const char *logFloder,int logKeepDays)
+    :m_file(NULL),m_target(target),m_logKeepDays(logKeepDays){
+    m_instance = nullptr;
     if(strlen(logFloder) > maxFolderLen){
         cout<<"日志目录过长"<<endl;
         return;
@@ -72,8 +73,8 @@ void Loger::_Output(const string &text, LOG_LEVEL level){
     switch(level){
         case TRACE:prefix = "[TRACE]";break;
         case DEBUG:prefix = "[DEBUG]";break;
-        case INFORMATION:prefix = "[INFO]";break;
-        case WARNING:prefix = "[WARN]";break;
+        case INFO:prefix = "[INFO]";break;
+        case WARN:prefix = "[WARN]";break;
         case ERROR:prefix = "[ERROR]";break;
         case FATAL:prefix = "[FATAL]";break;
         default:prefix = "[DEBUG]";break;
@@ -104,11 +105,11 @@ void Loger::Trace(const string &text){
 void Loger::Debug(const string &text){
     _Output(text,DEBUG);
 }
-void Loger::Information(const string &text){
-    _Output(text,INFORMATION);
+void Loger::Info(const string &text){
+    _Output(text,INFO);
 }
 void Loger::Warn(const string &text){
-    _Output(text,WARNING);
+    _Output(text,WARN);
 }
 void Loger::Error(const string &text){
     _Output(text,ERROR);
@@ -136,3 +137,5 @@ void Loger::test(){
 
 Loger::~Loger(){
 }
+
+Loger* Loger::m_instance = new Loger;
