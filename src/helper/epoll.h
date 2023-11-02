@@ -9,6 +9,7 @@ public:
     static Epoll* getInstance(){return m_instance;}
 
     Epoll(int maxEvent=1024);
+    Epoll(Epoll*);
     ~Epoll();
     int getEpfd(){return this->m_epfd;}
 

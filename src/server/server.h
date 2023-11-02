@@ -25,7 +25,7 @@ private:
 
     std::shared_ptr<Epoll> m_epoll;
     ThreadPool<HttpConn> *m_threadpool;
-    std::unique_ptr<Loger> m_loger;
+    std::shared_ptr<Loger> m_loger;
 
     void _init();
     void _addClient(int fd, sockaddr_in addr);

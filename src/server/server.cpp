@@ -1,10 +1,9 @@
 #include "server.h"
 
 Server::Server(int port):m_port(port){
-    m_epoll = make_shared<Epoll>(Epoll::getInstance());
     m_threadpool = new ThreadPool<HttpConn>;
-    unique_ptr<Loger> loger_temp(new Loger(Loger::TARGET_FILE,"../../logs"));
-    m_loger = std::move(loger_temp);
+    m_epoll = make_shared<Epoll>(Epoll::getInstance());
+    m_loger = make_shared<Loger>(Loger::getInstance());
     m_users = new HttpConn[MAX_FD];
     m_user_cnt = 0;
     _init();
@@ -13,7 +12,6 @@ Server::Server(int port):m_port(port){
 Server::~Server(){
     delete m_threadpool;
     delete[] m_users;
-    m_loger.release();
     close(m_listenfd);
 }
 

@@ -24,6 +24,7 @@ public:
         TARGET_FILE_AND_TERMINAL
     };
     Loger(){}
+    Loger(Loger*);
     Loger(LOG_TARGET target, const char* logFloder, int logKeepDays=30);
     ~Loger();
 
@@ -38,10 +39,10 @@ public:
 
 private:
     static Loger* m_instance;
-    const size_t maxFolderLen = 256;
-    const int maxFileNameLen = 64;
-    char m_logFolder[256];
-    char m_logFileName[64];
+    const size_t m_maxFolderLen = 256;
+    const int m_maxFileNameLen = 64;
+    string m_logFolder;
+    string m_logFileName;
     FILE* m_file;
     ofstream m_outfile;
     LOG_TARGET m_target;

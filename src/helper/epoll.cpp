@@ -5,6 +5,11 @@ Epoll::Epoll(int maxEvent){
     m_instance = nullptr;
 }
 
+Epoll::Epoll(Epoll *epoll){
+    this->m_epfd = epoll->m_epfd;
+    this->m_events = epoll->m_events;
+}
+
 Epoll::~Epoll(){
 }
 

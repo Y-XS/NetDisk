@@ -2,20 +2,32 @@
 #include<string.h>
 #include<vector>
 
-Loger::Loger(LOG_TARGET target, const char *logFloder,int logKeepDays)
-    :m_file(NULL),m_target(target),m_logKeepDays(logKeepDays){
+Loger* Loger::m_instance = new Loger(Loger::TARGET_FILE,"../../logs");
+
+Loger::Loger(Loger *loger){
+    this->m_file = loger->m_file;
+    this->m_logFileName = loger->m_logFileName;
+    this->m_logFolder = loger->m_logFolder;
+    this->m_logKeepDays = loger->m_logKeepDays;
+    // this->m_outfile = loger->m_outfile;
+    this->m_target = loger->m_target;
+}
+
+Loger::Loger(LOG_TARGET target, const char *logFloder, int logKeepDays)
+    : m_file(NULL), m_target(target), m_logKeepDays(logKeepDays)
+{
     m_instance = nullptr;
-    if(strlen(logFloder) > maxFolderLen){
+    if(strlen(logFloder) > m_maxFolderLen){
         cout<<"日志目录过长"<<endl;
         return;
     }
     if(target!=TARGET_TERMINAL && access(logFloder,0)!=0){
         mkdir(logFloder, S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH);
     }
-    strcpy(m_logFolder, logFloder);
-    strcpy(m_logFileName, GetCurDay().append(".log").c_str());
-}
+    m_logFolder = logFloder;
+    m_logFileName = GetCurDay().append(".log");
 
+}
 
 string Loger::_GetFormatTime(){
     time_t curTime;
@@ -33,7 +45,7 @@ string Loger::_GetFormatTime(){
     return string(formatTime);
 }
 void Loger::_HandleOldLogs(){
-    DIR* dir = opendir(m_logFolder);
+    DIR* dir = opendir(m_logFolder.c_str());
     struct dirent* dp;
     vector<string> fileNames;
     string fileName;
@@ -59,7 +71,6 @@ void Loger::_HandleOldLogs(){
 
 void Loger::_ToFile(string text){
     string logPath = string(m_logFolder).append("/").append(m_logFileName);
-    
     m_outfile.open(logPath,ios::app);
     if(!m_outfile){
         cerr<<"[ERROR]:"<<"open file failed"<<endl;
@@ -137,5 +148,3 @@ void Loger::test(){
 
 Loger::~Loger(){
 }
-
-Loger* Loger::m_instance = new Loger;

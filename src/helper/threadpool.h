@@ -14,7 +14,7 @@ private:
     int m_thread_num;
     int m_max_requests;
     pthread_t* m_threads;
-    std::list<T> m_work_queue;
+    std::list<T*> m_work_queue;
     Locker m_queue_locker;
     Sem m_queue_stat;
     bool m_stop;

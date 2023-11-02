@@ -10,8 +10,7 @@
 #include"loger.h"
 #include<memory>
 int main(){
-    std::shared_ptr<Loger> loger = make_shared<Loger>(Loger::getInstance());
-    loger->Debug("logger test");
+    // loger->Debug("logger test");
     return 0;
 }
 

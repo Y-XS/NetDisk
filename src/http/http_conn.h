@@ -21,6 +21,7 @@ class HttpConn{
 public:
   static int m_userCnt;
 
+  HttpConn();
   void init(int sockfd,const sockaddr_in &addr,int epfd);
   ssize_t read();
   ssize_t write();
