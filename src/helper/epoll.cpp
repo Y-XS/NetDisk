@@ -1,6 +1,6 @@
 #include"epoll.h"
 
-Epoll::Epoll(int maxEvent){
+Epoll::Epoll(int maxEvent):m_events(maxEvent){
     m_epfd = epoll_create(maxEvent);
     m_instance = nullptr;
 }
@@ -43,7 +43,8 @@ void Epoll::delFd(int fd){
 }
 
 int Epoll::wait(int timeout_ms){
-    return epoll_wait(m_epfd,&m_events[0],m_events.size(),timeout_ms);
+
+    return epoll_wait(m_epfd,&m_events[0],static_cast<int>(m_events.size()),timeout_ms);
 }
 
 void Epoll::_setNonBlocking(int fd){

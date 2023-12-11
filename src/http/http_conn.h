@@ -20,11 +20,14 @@
 class HttpConn{
 public:
   static int m_userCnt;
+  enum STATE{
+    READ,WRITE
+  };
 
   HttpConn();
-  void init(int sockfd,const sockaddr_in &addr,int epfd);
-  ssize_t read();
-  ssize_t write();
+  void init(int sockfd,const sockaddr_in &addr);
+  ssize_t readBuf();
+  ssize_t writeBuf();
   bool process();
   void close();
   void close_conn();
@@ -33,11 +36,17 @@ public:
   sockaddr_in getAddr() const {return m_addr;}
   const char* getIP() const {return inet_ntoa(m_addr.sin_addr);}
   int getPort() const {return m_addr.sin_port;}
-  // const char* getClientInfo();
+  STATE getState() const {return m_state;}
+  STATE setState(STATE state) {m_state = state;}
 private:
   int m_sockFd;
-  int m_epfd;
   struct sockaddr_in m_addr;
+  STATE m_state;
+  static const int BUF_SIZE = 1024;
+  
+  char m_readBuf[BUF_SIZE];
+  char m_writeBuf[BUF_SIZE];
+
   HttpRequest m_request;
   HttpResponse m_response;
 };

@@ -1,0 +1,17 @@
+GET /webDemo/Hellow HTTP/1.1  //请求行
+Host: localhost:8080      //请求头
+Connection: keep-alive
+Accept: text/html
+Accept-Encoding: gzip, deflate, sdch, br
+Accept-Language: zh-CN,zh;q=0.8
+                //空行
+                //实体内容
+
+
+GET /webDemo/Hellow HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Accept: text/html
+Accept-Encoding: gzip, deflate, sdch, br
+Accept-Language: zh-CN,zh;q=0.8
+

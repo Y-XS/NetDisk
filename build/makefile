@@ -11,5 +11,5 @@ server: $(src)
 	g++ $^ -o ../bin/$@ $(args)
 
 clean:
-	-rm -rf $(obj) ./bin/server
+	-rm -rf $(obj) ../bin/server
 .PHONY: clean all

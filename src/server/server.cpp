@@ -1,12 +1,15 @@
 #include "server.h"
+#include<errno.h>
 
 Server::Server(int port):m_port(port){
     m_threadpool = new ThreadPool<HttpConn>;
     m_epoll = make_shared<Epoll>(Epoll::getInstance());
+    assert(m_epoll);
     m_loger = make_shared<Loger>(Loger::getInstance());
     m_users = new HttpConn[MAX_FD];
     m_user_cnt = 0;
     _init();
+    m_loger->Debug("Server init.");
 }
 
 Server::~Server(){
@@ -33,9 +36,11 @@ void Server::_init(){
         m_loger->Debug("listen error.");
     }
     m_epoll->addFd(m_listenfd,EPOLLIN,false);
+    m_loger->Debug("listening...");
 }
 
 void Server::start(){
+    m_loger->Debug("Server start...");
     while(true){
         int event_cnt = m_epoll->wait(-1);
         if(event_cnt<0 && errno!=EINTR){
@@ -62,7 +67,7 @@ void Server::start(){
 
 void Server::_addClient(int fd, sockaddr_in addr){
     assert(fd>0);
-    m_users[fd].init(fd,addr,m_epoll->getEpfd());
+    m_users[fd].init(fd,addr);
     m_epoll->addFd(fd,EPOLLIN);
     std::string str;
     str.append("client ").append(m_users[fd].getIP()).append(" visit.");
@@ -84,9 +89,11 @@ void Server::_handleListen(){
     _addClient(connfd,client_addr);
 }
 void Server::_handleRead(HttpConn* client){
+    client->setState(HttpConn::STATE::READ);
     m_threadpool->append(client);
 }
 void Server::_handleWrite(HttpConn* client){
+    client->setState(HttpConn::STATE::WRITE);
     m_threadpool->append(client);
 }
 void Server::_onRead(HttpConn* client){

@@ -2,7 +2,7 @@
 #include<string.h>
 #include<vector>
 
-Loger* Loger::m_instance = new Loger(Loger::TARGET_FILE,"../../logs");
+Loger* Loger::m_instance = new Loger(Loger::TARGET_TERMINAL,"../../logs");
 
 Loger::Loger(Loger *loger){
     this->m_file = loger->m_file;

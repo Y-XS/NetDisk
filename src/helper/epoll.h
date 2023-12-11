@@ -25,6 +25,7 @@ private:
     int m_epfd;
     static const int OPEN_MAX = 1024;
     std::vector<struct epoll_event> m_events;
+    
 
     void _setNonBlocking(int fd);
 };

@@ -7,10 +7,14 @@
 
 
 //test
-#include"loger.h"
 #include<memory>
+#include"./server/server.h"
+#include"loger.h"
 int main(){
-    // loger->Debug("logger test");
+    Loger* loger = Loger::getInstance();
+    loger->Debug("logger test");
+    Server server(9999);
+    server.start();
     return 0;
 }
 
