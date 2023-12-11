@@ -12,38 +12,44 @@
 #include <iostream>
 #include <sys/mman.h>
 #include <stdarg.h>
+// #include <vector>
 #include "http_request.h"
 #include "http_response.h"
 #include "../helper/epoll.h"
 
-
-class HttpConn{
+class HttpConn
+{
 public:
   static int m_userCnt;
-  enum STATE{
-    READ,WRITE
+  enum STATE
+  {
+    READ,
+    WRITE
   };
 
   HttpConn();
-  void init(int sockfd,const sockaddr_in &addr);
+  void init(int sockfd, const sockaddr_in &addr);
   ssize_t readBuf();
   ssize_t writeBuf();
   bool process();
   void close();
   void close_conn();
 
-  int getFd() const {return m_sockFd;}
-  sockaddr_in getAddr() const {return m_addr;}
-  const char* getIP() const {return inet_ntoa(m_addr.sin_addr);}
-  int getPort() const {return m_addr.sin_port;}
-  STATE getState() const {return m_state;}
-  STATE setState(STATE state) {m_state = state;}
+  int getFd() const { return m_sockFd; }
+  sockaddr_in getAddr() const { return m_addr; }
+  const char *getIP() const { return inet_ntoa(m_addr.sin_addr); }
+  int getPort() const { return m_addr.sin_port; }
+  STATE getState() const { return m_state; }
+  STATE setState(STATE state) { m_state = state; }
+
 private:
   int m_sockFd;
   struct sockaddr_in m_addr;
   STATE m_state;
   static const int BUF_SIZE = 1024;
-  
+
+  // std::vector<char> m_readBuf;
+  // std::vector<char> m_writeBuf;
   char m_readBuf[BUF_SIZE];
   char m_writeBuf[BUF_SIZE];
 

@@ -17,9 +17,11 @@ void HttpConn::init(int sockfd, const sockaddr_in &addr){
 
 ssize_t HttpConn::readBuf()
 {
-    int n = read(m_sockFd,m_readBuf,1024);
+    memset(m_readBuf,'\0',BUF_SIZE);
+    ssize_t read_cnt = read(m_sockFd,m_readBuf,1024);
     // std::cout<<"read: "<<m_readBuf<<std::endl;
-    return n;
+
+    return read_cnt;
 }
 
 ssize_t HttpConn::writeBuf()

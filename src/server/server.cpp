@@ -78,6 +78,8 @@ void Server::_handleListen(){
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
     int connfd = accept(m_listenfd,(struct sockaddr*)&client_addr,&client_addr_len);
+    m_loger->Debug("accept=========================");
+
     if(connfd<0){
         m_loger->Debug("accept error.");
         return;
