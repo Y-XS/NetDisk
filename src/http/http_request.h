@@ -4,6 +4,9 @@
 #include<unordered_map>
 #include<vector>
 #include <ctype.h>
+#include<regex>
+#include<string.h>
+#include"../utils/loger.h"
 
 #define CR '\r'
 #define LF '\n'
@@ -45,13 +48,6 @@ public:
     const std::unordered_map<std::string, std::string>& getHeaders() const {return m_headers;}
     const std::string& getBody() const {return m_body;}
 private:
-    /*解析客户请求时，主状态机所处的状态（回忆第8章）*/
-    // enum PARSE_STATE{
-    //     STATE_REQUESTLINE,
-    //     STATE_HEADER,
-    //     STATE_BODY,
-    //     INVALID_REQUEST,
-    // };
     PARSE_STATE m_state;
     //请求行参数
     METHOD m_method;
@@ -63,7 +59,11 @@ private:
     std::unordered_map<std::string,std::string> m_headers;
     //请求体
     std::string m_body;
+    int m_bodySize;
     int m_nextPos;
+
+    std::string method2str(METHOD method);
+    METHOD str2method(std::string str);
 };
 
 #endif

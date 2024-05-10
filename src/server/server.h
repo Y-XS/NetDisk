@@ -21,7 +21,7 @@ private:
     int m_listenfd;
     struct sockaddr_in m_serv_addr;
     HttpConn* m_users;
-    int m_user_cnt;
+    // int m_user_cnt;
 
     std::shared_ptr<Epoll> m_epoll;
     ThreadPool<HttpConn> *m_threadpool;
@@ -32,8 +32,6 @@ private:
     void _handleListen();
     void _handleRead(HttpConn* client);
     void _handleWrite(HttpConn* client);
-    void _onWrite(HttpConn* client);
-    void _onRead(HttpConn* client);
     void _closeConn(HttpConn* client);
 };
 

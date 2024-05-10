@@ -15,7 +15,7 @@ Epoll::~Epoll(){
 
 void Epoll::addFd(int fd, uint32_t events, bool one_shot){
     struct epoll_event event;
-    event.events = events|EPOLLET;
+    event.events = events|EPOLLET|EPOLLRDHUP;
     event.data.fd = fd;
     if(one_shot){
         event.events |= EPOLLONESHOT;
@@ -28,11 +28,12 @@ void Epoll::addFd(int fd, uint32_t events, bool one_shot){
 }
 void Epoll::modFd(int fd, uint32_t events){
     struct epoll_event event;
-    event.events = events;
+    event.events = events | EPOLLONESHOT | EPOLLRDHUP;
     event.data.fd = fd;
     int ret = epoll_ctl(m_epfd,EPOLL_CTL_MOD,fd,&event);
     if(ret != 0){
         //log here
+        Loger::getInstance()->Debug("error");
     }
 }
 void Epoll::delFd(int fd){

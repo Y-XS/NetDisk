@@ -7,9 +7,17 @@ Server::Server(int port):m_port(port){
     assert(m_epoll);
     m_loger = make_shared<Loger>(Loger::getInstance());
     m_users = new HttpConn[MAX_FD];
-    m_user_cnt = 0;
+    //初始化HTTP连接信息
+    HttpConn::userCnt = 0;
+    char* dir = getcwd(nullptr,256);
+    strncat(dir, "/root/", 16);
+    HttpConn::rootDir = dir;
+
+    //数据库连接池
+
+    //服务器初始化
     _init();
-    m_loger->Debug("Server init.");
+    // m_loger->Debug("Server init.");
 }
 
 Server::~Server(){
@@ -24,19 +32,18 @@ void Server::_init(){
     m_serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     int ret = 0;
     if((m_listenfd = socket(AF_INET,SOCK_STREAM,0)) == -1){
-        m_loger->Debug("socket error.");
+        m_loger->Error("create socket error.");
     }
     //设置端口复用
     int opt = 1;
     setsockopt(m_listenfd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt));
     if((ret = bind(m_listenfd,(struct sockaddr*)&m_serv_addr,sizeof(m_serv_addr))) == -1){
-        m_loger->Debug("bind error.");
+        m_loger->Error("bind error.");
     }
     if((ret = listen(m_listenfd,128)) == -1){
-        m_loger->Debug("listen error.");
+        m_loger->Error("listen error.");
     }
     m_epoll->addFd(m_listenfd,EPOLLIN,false);
-    m_loger->Debug("listening...");
 }
 
 void Server::start(){
@@ -44,7 +51,7 @@ void Server::start(){
     while(true){
         int event_cnt = m_epoll->wait(-1);
         if(event_cnt<0 && errno!=EINTR){
-            m_loger->Debug("epoll wait error.");
+            m_loger->Error("epoll wait error.");
             break;
         }
         for(int i=0;i<event_cnt;i++){
@@ -68,7 +75,7 @@ void Server::start(){
 void Server::_addClient(int fd, sockaddr_in addr){
     assert(fd>0);
     m_users[fd].init(fd,addr);
-    m_epoll->addFd(fd,EPOLLIN);
+    m_epoll->addFd(fd,EPOLLIN,true);
     std::string str;
     str.append("client ").append(m_users[fd].getIP()).append(" visit.");
     m_loger->Info(str.c_str());
@@ -78,13 +85,11 @@ void Server::_handleListen(){
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
     int connfd = accept(m_listenfd,(struct sockaddr*)&client_addr,&client_addr_len);
-    m_loger->Debug("accept=========================");
-
     if(connfd<0){
-        m_loger->Debug("accept error.");
+        m_loger->Error("accept error.");
         return;
     }
-    if(HttpConn::m_userCnt>=MAX_FD){
+    if(HttpConn::userCnt>=MAX_FD){
         //send to client: Internal server busy
         return;
     }
@@ -98,24 +103,11 @@ void Server::_handleWrite(HttpConn* client){
     client->setState(HttpConn::STATE::WRITE);
     m_threadpool->append(client);
 }
-void Server::_onRead(HttpConn* client){
-    // assert(client);
-    // client->read();
-    // uint32_t connEvent = EPOLLET;
-    // if(client->process()){
-    //     m_epoll->modFd(client->getFd(),connEvent | EPOLLOUT);
-    // }else{
-    //     m_epoll->modFd(client->getFd(),connEvent | EPOLLIN);
-    // }
-}
-void Server::_onWrite(HttpConn* client){
-    // if(!m_users[sockfd].write()){
-    //     m_users[sockfd].close_conn();
-    // }
-}
 
 void Server::_closeConn(HttpConn* client){
-    m_loger->Info("client quit.");
-    m_epoll->delFd(client->getFd());
-    client->close();
+    std::string info;
+    info.append("client ").append(client->getIP()).append(" quit.");
+    m_loger->Info(info);
+    // m_epoll->delFd(client->getFd());
+    client->close_conn();
 }
