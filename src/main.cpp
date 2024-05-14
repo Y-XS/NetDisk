@@ -1,6 +1,7 @@
 #include<memory>
 #include"./server/server.h"
 #include"loger.h"
+#include "./http/http_response.h"
 
 int main(){
     //日志配置项
@@ -12,5 +13,6 @@ int main(){
     loger->Debug("logger test");
     Server server(9999);
     server.start();
+
     return 0;
 }

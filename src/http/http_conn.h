@@ -13,6 +13,7 @@
 #include <sys/mman.h>
 #include <stdarg.h>
 #include <map>
+#include <sys/uio.h>
 // #include <vector>
 #include "http_request.h"
 #include "http_response.h"
@@ -24,6 +25,7 @@ class HttpConn
 public:
   static int userCnt;
   static string rootDir;
+  static const int FILENAME_LEN = 200;
   
   enum STATE
   {
@@ -34,10 +36,11 @@ public:
   HttpConn();
   void init(int sockfd, const sockaddr_in &addr);
   ssize_t readBuf();
-  ssize_t writeBuf();
+  // ssize_t writeBuf();
   bool process();
   string doRequest();
   int doResponse(string retBody);
+  void unMap();
   void close_conn();
 
   int getFd() const { return m_sockFd; }
@@ -57,6 +60,12 @@ private:
   // std::vector<char> m_writeBuf;
   char m_readBuf[BUF_SIZE];
   char m_writeBuf[BUF_SIZE];
+  // char* m_res_root;
+  char m_file_name[FILENAME_LEN];
+  char* m_file_address;
+  struct stat m_file_stat;
+  int m_iovCnt;
+  struct iovec m_iov[2];
 
   HttpRequest m_request;
   HttpResponse m_response;

@@ -17,7 +17,7 @@ void HttpRequest::parse(std::string requestStr){
         switch(m_state){
             case PARSE_STATE::START:{
                 Loger::getInstance()->Debug("=====START======");
-                std::cout<<requestStr<<std::endl;
+                // std::cout<<requestStr<<std::endl;
                 m_state = PARSE_STATE::REQUESTLINE;
                 break;
             }
@@ -31,7 +31,7 @@ void HttpRequest::parse(std::string requestStr){
                 int rpos = requestLine.rfind(" ");
                 m_method = str2method(requestLine.substr(0,pos));
                 m_url = requestLine.substr(pos+1,rpos-pos-1);
-                std::cout<<m_url<<std::endl;
+                // std::cout<<m_url<<std::endl;
                 m_version = requestLine.substr(rpos+1,len);
                 m_nextPos += reqLineLen;
                 m_state = PARSE_STATE::HEADER;
@@ -57,7 +57,7 @@ void HttpRequest::parse(std::string requestStr){
                     if(tmp.find(":") != std::string::npos){
                         std::string key = tmp.substr(0, tmp.find(":"));
                         std::string value = tmp.substr(tmp.find(":")+1,tmp.size()-tmp.find(":"));
-                        m_params[key] = value;
+                        m_headers[key] = value;
                     }
                     startPos = pos + strlen("\r\n");
                 }while(startPos < requestStr.size() - m_bodySize && startPos > 0);
@@ -75,6 +75,10 @@ void HttpRequest::parse(std::string requestStr){
         }
     }
     m_state = PARSE_STATE::START;
+    // cout<<"***** parse complete *****"<<endl;
+    // for(auto it = m_headers.begin();it!=m_headers.end();it++){
+    //     cout<<it->first<<" "<<it->second<<endl;
+    // }
 }
 
 std::string HttpRequest::method2str(METHOD method)

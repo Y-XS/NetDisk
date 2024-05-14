@@ -2,6 +2,11 @@
 #include<errno.h>
 
 Server::Server(int port):m_port(port){
+    chdir("..");
+    char* dir = getcwd(nullptr,100);
+    strcat(dir, "/res");
+    HttpConn::rootDir = string(dir);
+
     m_threadpool = new ThreadPool<HttpConn>;
     m_epoll = make_shared<Epoll>(Epoll::getInstance());
     assert(m_epoll);
@@ -9,9 +14,6 @@ Server::Server(int port):m_port(port){
     m_users = new HttpConn[MAX_FD];
     //初始化HTTP连接信息
     HttpConn::userCnt = 0;
-    char* dir = getcwd(nullptr,256);
-    strncat(dir, "/root/", 16);
-    HttpConn::rootDir = dir;
 
     //数据库连接池
 
@@ -105,9 +107,7 @@ void Server::_handleWrite(HttpConn* client){
 }
 
 void Server::_closeConn(HttpConn* client){
-    std::string info;
-    info.append("client ").append(client->getIP()).append(" quit.");
-    m_loger->Info(info);
+
     // m_epoll->delFd(client->getFd());
     client->close_conn();
 }

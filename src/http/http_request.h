@@ -45,7 +45,7 @@ public:
     const std::unordered_map<std::string, std::string>& getParams() const {return m_params;}
     const std::string& getProtocol() const {return m_protocol;}
     const std::string& getVersion() const {return m_version;}
-    const std::unordered_map<std::string, std::string>& getHeaders() const {return m_headers;}
+    std::unordered_map<std::string, std::string>& getHeaders() {return m_headers;}
     const std::string& getBody() const {return m_body;}
 private:
     PARSE_STATE m_state;
