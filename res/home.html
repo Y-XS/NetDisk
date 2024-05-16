@@ -1,6 +1,34 @@
 <!DOCTYPE html>
 <html>
-    <body>
-        <h1>Home Page</h1>
-    </body>
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-wrapper">
+            <button id="btn_pic" type="button" class="btn">图片</button>
+            <button id="btn_vedio" type="button" class="btn">视频</button>
+            <button id="btn_file" type="button" class="btn">文件</button>
+            <script>
+                let btn_pic = document.getElementById("btn_pic");
+                let btn_vedio = document.getElementById("btn_vedio");
+                let btn_file = document.getElementById("btn_file");
+                btn_pic.onclick = function () {
+                    window.location.href="/pic.html";
+                }
+                btn_vedio.onclick = function () {
+                    window.location.href="/video.html";
+                }
+                btn_file.onclick = function () {
+                    window.location.href="/file.html";
+                }
+            </script>
+        </div>
+    </div>
+
+</body>
+
 </html>

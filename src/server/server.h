@@ -9,7 +9,7 @@
 #include"../http/http_conn.h"
 #include"../utils/loger.h"
 
-#define MAX_FD 65536
+#define MAX_FD 65535
 class Server{
 public:
     Server(int port);

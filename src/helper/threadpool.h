@@ -34,7 +34,7 @@ ThreadPool<T>::ThreadPool(int thread_num,int max_requests)
     for(int i=0;i<thread_num;++i){
         // std::cout<<"create the "<<i<<"th thread."<<std::endl;
         //pthread_create第三个参数必须传静态函数，因此将this指针作为参数传进子线程以执行_run业务函数
-        if(pthread_create(m_threads+i,NULL,_worker,this)!=0 && pthread_detach(m_threads[i])){
+        if(pthread_create(m_threads+i,NULL,_worker,this)!=0 && pthread_detach(m_threads[i])!=0){
             delete[] m_threads;
             throw std::exception();
         }

@@ -1,6 +1,72 @@
 <!DOCTYPE html>
 <html>
-    <body>
-        <h1>Login Page</h1>
-    </body>
+
+<head>
+    <meta charset="utf-8" />
+    <title>登录</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script type="text/javascript">
+        function login() {
+            var form = document.getElementById("form");
+            var formData = new FormData(form);
+            console.log(formData)
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", form.action, true);
+            xhr.onload = function () {
+                // 处理服务器响应
+                console.log(xhr.responseText);
+            };
+            xhr.send(formData);
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-wrapper">
+            <form id="form" method="post" action="/login">
+                <div class="header">欢迎登录</div>
+                <div class="form-wrapper">
+                    <!-- <label>账号</label> -->
+                    <input id="userName" name="userName" class="input-item" type="text" placeholder="账号"><br>
+                    <!-- <label>密码</label> -->
+                    <input id="password" name="password" class="input-item" type="password" placeholder="密码"><br>
+                    <!-- <input id="login" type="submit" value="登录" class="btn"> -->
+                    <button id="btn_login" type="button" class="btn">登录</button>
+                    <div class="info">
+                        <label>注册</label>
+                        <span>|</span>
+                        <label>联系我们</label>
+                    </div>
+                    <script>
+                        let btn = document.getElementById("btn_login");
+                        btn.onclick = function () {
+                            var userName = document.getElementById("userName").value;
+                            var password = document.getElementById("password").value;
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("POST", form.action, true);
+                            xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+                            xhr.onload = function () {
+                                // 处理服务器响应
+                                var ret = xhr.responseText;
+                                console.log(xhr.responseText);
+                                if(ret == "登录成功！"){
+                                    // location.href="/home.html?user="+encodeURI(userName);
+                                    location.href="/home.html";
+                                }else{
+                                    alert(ret)
+                                    return;
+                                }
+                            };
+                            xhr.send("userName="+userName+"&password="+password);
+                        }
+                    </script>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</body>
+
 </html>

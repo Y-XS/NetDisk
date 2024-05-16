@@ -24,17 +24,15 @@ void HttpRequest::parse(std::string requestStr){
             case PARSE_STATE::REQUESTLINE:{
                 Loger::getInstance()->Debug("=====REQUESTLINE======");
                 int reqLineLen = requestStr.find("\r\n");
-
                 std::string requestLine = requestStr.substr(0,reqLineLen);
-
                 int pos = requestLine.find(" ");
                 int rpos = requestLine.rfind(" ");
                 m_method = str2method(requestLine.substr(0,pos));
                 m_url = requestLine.substr(pos+1,rpos-pos-1);
-                // std::cout<<m_url<<std::endl;
                 m_version = requestLine.substr(rpos+1,len);
                 m_nextPos += reqLineLen;
                 m_state = PARSE_STATE::HEADER;
+                // cout<<method2str(m_method)<<" "<<m_url<<endl;
             }
             case PARSE_STATE::HEADER:{
                 Loger::getInstance()->Debug("=====HEADER======");
@@ -44,7 +42,6 @@ void HttpRequest::parse(std::string requestStr){
                 // if(regex_match(requestStr, subMatch, patten)){
                 //     m_params[subMatch[1]] = subMatch[2];
                 // }
-
                 int start = requestStr.find("Content-Length: ") + strlen("Content-Length: ");
                 int end = requestStr.find("\r\n", start);
                 m_bodySize = atoi(requestStr.substr(start,end-start).c_str());
@@ -70,6 +67,49 @@ void HttpRequest::parse(std::string requestStr){
                     break;
                 }
                 m_body = requestStr.substr(requestStr.size() - m_bodySize, m_bodySize);
+                // cout<<"------m_body-----"<<m_body<<endl;
+                std::string tmp = m_body;
+                // cout<<"------tmp-----"<<tmp<<endl;
+
+                std::vector<std::string> vec;
+                int pos = 0;
+                while((pos = tmp.find("&"))!=std::string::npos){
+                    vec.push_back(tmp.substr(0,pos));
+                    tmp = tmp.substr(pos+1,m_body.size());
+                }
+                vec.push_back(tmp);
+                for(std::string item:vec){
+                    int pos = item.find("=");
+                    std::string key = item.substr(0,pos);
+                    std::string value = item.substr(pos+1,item.size());
+                    cout<<key<<" "<<value<<endl;
+                    m_post_params[key] = value;
+                }
+                cout<<"m_post_params"<<endl;
+                for(auto it:m_post_params){
+                    cout<<it.first<<" "<<it.second<<endl;
+                }
+                //神奇BUG
+                // int left = 0, right = 0,end = 0, flag=0;
+                // while(tmp.size()>0 && flag==0){
+                //     cout<<"-----------"<<endl;
+                //     right = tmp.find("=");
+                //     std::string key = tmp.substr(left,right);
+
+                //     end = tmp.find("&");
+                //     cout<<"end="<<end<<endl;
+                //     if(end==std::string::npos){
+                //         end = tmp.size();
+                //         flag++;
+                //     }
+                //     cout<<"end="<<end<<endl;
+                //     cout<<"right="<<right<<endl;
+                //     std::string value = tmp.substr(right+1,end);
+                //     std::string val = tmp.substr(8+1,14);
+                //     cout<<"------tmp-----"<<tmp<<endl;
+                //     tmp = m_body.substr(end+1,m_body.size());
+                //     cout<<key<<" "<<value<<" "<<val<<" "<<tmp<<endl;
+                // }
                 m_state = PARSE_STATE::COMPLEIE;
             }
         }

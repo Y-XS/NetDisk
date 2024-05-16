@@ -2,26 +2,24 @@
 #include<errno.h>
 
 Server::Server(int port):m_port(port){
+    //资源根目录
     chdir("..");
     char* dir = getcwd(nullptr,100);
     strcat(dir, "/res");
     HttpConn::rootDir = string(dir);
-
+    //初始化HTTP连接信息
+    //http连接数组
+    m_users = new HttpConn[MAX_FD];
+    HttpConn::userCnt = 0;
+    //线程池
     m_threadpool = new ThreadPool<HttpConn>;
     m_epoll = make_shared<Epoll>(Epoll::getInstance());
-    assert(m_epoll);
     m_loger = make_shared<Loger>(Loger::getInstance());
-    m_users = new HttpConn[MAX_FD];
-    //初始化HTTP连接信息
-    HttpConn::userCnt = 0;
-
     //数据库连接池
 
     //服务器初始化
     _init();
-    // m_loger->Debug("Server init.");
 }
-
 Server::~Server(){
     delete m_threadpool;
     delete[] m_users;
@@ -62,8 +60,10 @@ void Server::start(){
             if(sockfd == m_listenfd){
                 _handleListen();
             }else if(events & (EPOLLRDHUP|EPOLLHUP|EPOLLERR)){
+                //服务端关闭连接，移除对应定时器
                 _closeConn(&m_users[sockfd]);
             }else if(events & EPOLLIN){
+                
                 _handleRead(&m_users[sockfd]);
             }else if(events & EPOLLOUT){
                 _handleWrite(&m_users[sockfd]);
@@ -71,6 +71,8 @@ void Server::start(){
                 m_loger->Error("unexpected event.");
             }
         }
+        //定时器
+        
     }
 }
 

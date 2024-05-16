@@ -8,13 +8,14 @@
 #include <sys/epoll.h>
 #include <string.h>
 #include <errno.h>
+#include<sys/sendfile.h>
 #include <stdlib.h>
 #include <iostream>
 #include <sys/mman.h>
 #include <stdarg.h>
 #include <map>
+#include <set>
 #include <sys/uio.h>
-// #include <vector>
 #include "http_request.h"
 #include "http_response.h"
 #include "../helper/epoll.h"
@@ -26,6 +27,8 @@ public:
   static int userCnt;
   static string rootDir;
   static const int FILENAME_LEN = 200;
+  // static std::set<std::string> m_file_set;
+
   
   enum STATE
   {
@@ -36,11 +39,13 @@ public:
   HttpConn();
   void init(int sockfd, const sockaddr_in &addr);
   ssize_t readBuf();
-  // ssize_t writeBuf();
   bool process();
-  string doRequest();
-  int doResponse(string retBody);
-  void unMap();
+  int doRequest();
+  int doGet();
+  int doPost();
+  bool doResponse();
+  bool writeBuf();
+  void unmap();
   void close_conn();
 
   int getFd() const { return m_sockFd; }
@@ -54,21 +59,28 @@ private:
   int m_sockFd;
   struct sockaddr_in m_addr;
   STATE m_state;
-  static const int BUF_SIZE = 1024;
+  static const int BUF_SIZE = 4096;
+  static const int HEADER_SIZE = 1024;
 
-  // std::vector<char> m_readBuf;
-  // std::vector<char> m_writeBuf;
   char m_readBuf[BUF_SIZE];
   char m_writeBuf[BUF_SIZE];
-  // char* m_res_root;
+  int m_writeInfo_len;
+  char m_resp_header[HEADER_SIZE];
+
   char m_file_name[FILENAME_LEN];
   char* m_file_address;
   struct stat m_file_stat;
   int m_iovCnt;
   struct iovec m_iov[2];
+  int bytes_to_send;
+  int bytes_have_send;
 
   HttpRequest m_request;
   HttpResponse m_response;
+
+  void init();
+  void getFileList();
+  inline int getToWriteBytes(){return m_iov[0].iov_len+m_iov[1].iov_len;}
 };
 
 #endif
