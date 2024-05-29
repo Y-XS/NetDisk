@@ -1,8 +1,9 @@
 #include "loger.h"
 #include <vector>
+#include <stdarg.h>
 
 // Loger* Loger::m_instance = new Loger(Loger::TARGET_TERMINAL,"../../logs");
-Loger *Loger::m_instance = new Loger();
+Loger *Loger::m_instance = new Loger;
 
 Loger::Loger()
 {
@@ -10,32 +11,6 @@ Loger::Loger()
     m_logPath = "";
     m_logFileName = "";
     m_file = nullptr;
-}
-Loger::Loger(Loger *loger)
-{
-    this->m_file = loger->m_file;
-    this->m_logFileName = loger->m_logFileName;
-    this->m_logPath = loger->m_logPath;
-    this->m_logKeepDays = loger->m_logKeepDays;
-    // this->m_outfile = loger->m_outfile;
-    this->m_target = loger->m_target;
-}
-
-Loger::Loger(LOG_TARGET target, const char *path, int logKeepDays)
-    : m_file(NULL), m_target(target), m_logKeepDays(logKeepDays)
-{
-    m_instance = nullptr;
-    if (strlen(path) > m_maxFolderLen)
-    {
-        cout << "日志目录过长" << endl;
-        return;
-    }
-    if (target != TARGET_TERMINAL && access(path, 0) != 0)
-    {
-        mkdir(path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    }
-    m_logPath = path;
-    m_logFileName = GetCurDay().append(".log");
 }
 
 void Loger::setTarget(LOG_TARGET target) { this->m_target = target; }
@@ -111,7 +86,8 @@ void Loger::_ToFile(string text)
     m_outfile << text;
     m_outfile.close();
 }
-void Loger::_Output(const string &text, LOG_LEVEL level)
+
+void Loger::writeLog(int level, const char *format, ...)
 {
     string prefix;
     switch (level)
@@ -138,6 +114,11 @@ void Loger::_Output(const string &text, LOG_LEVEL level)
         prefix = "[DEBUG]";
         break;
     }
+    char buf[1024];
+    va_list valist;
+    va_start(valist, format);
+    vsnprintf(buf, 1024, format, valist);
+    string text(buf);
     string logItem;
     logItem.append(prefix)
         .append(_GetFormatTime())
@@ -166,31 +147,6 @@ void Loger::_Output(const string &text, LOG_LEVEL level)
     }
 }
 
-void Loger::Trace(const string &text)
-{
-    _Output(text, TRACE);
-}
-void Loger::Debug(const string &text)
-{
-    _Output(text, DEBUG);
-}
-void Loger::Info(const string &text)
-{
-    _Output(text, INFO);
-}
-void Loger::Warn(const string &text)
-{
-    _Output(text, WARN);
-}
-void Loger::Error(const string &text)
-{
-    _Output(text, ERROR);
-}
-void Loger::Fatal(const string &text)
-{
-    _Output(text, FATAL);
-}
-
 string Loger::GetCurDay()
 {
     time_t curTime;
@@ -209,6 +165,6 @@ void Loger::test()
     _HandleOldLogs();
 }
 
-Loger::~Loger()
-{
-}
+// Loger::~Loger()
+// {
+// }

@@ -16,13 +16,13 @@ void HttpRequest::parse(std::string requestStr){
     ){
         switch(m_state){
             case PARSE_STATE::START:{
-                Loger::getInstance()->Debug("=====START======");
+                LOG_DEBUG("=====START======");
                 // std::cout<<requestStr<<std::endl;
                 m_state = PARSE_STATE::REQUESTLINE;
                 break;
             }
             case PARSE_STATE::REQUESTLINE:{
-                Loger::getInstance()->Debug("=====REQUESTLINE======");
+                LOG_DEBUG("=====REQUESTLINE======");
                 int reqLineLen = requestStr.find("\r\n");
                 std::string requestLine = requestStr.substr(0,reqLineLen);
                 int pos = requestLine.find(" ");
@@ -35,7 +35,7 @@ void HttpRequest::parse(std::string requestStr){
                 // cout<<method2str(m_method)<<" "<<m_url<<endl;
             }
             case PARSE_STATE::HEADER:{
-                Loger::getInstance()->Debug("=====HEADER======");
+                LOG_DEBUG("=====HEADER======");
                 //正则表达式要求gcc版本
                 // regex patten("^([^:]*): ?(.*?)$");
                 // smatch subMatch;
@@ -61,7 +61,7 @@ void HttpRequest::parse(std::string requestStr){
                 m_state = PARSE_STATE::BODY;
             }
             case PARSE_STATE::BODY:{
-                Loger::getInstance()->Debug("=====BODY======");
+                LOG_DEBUG("=====BODY======");
                 if(m_bodySize == 0){
                     m_state = PARSE_STATE::COMPLEIE;
                     break;

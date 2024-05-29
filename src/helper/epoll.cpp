@@ -23,6 +23,7 @@ void Epoll::addFd(int fd, uint32_t events, bool one_shot){
     int ret = epoll_ctl(m_epfd,EPOLL_CTL_ADD,fd,&event);
     if(ret != 0){
         //log here
+        LOG_ERROR("addFd error");
     }
     _setNonBlocking(fd);
 }
@@ -33,13 +34,14 @@ void Epoll::modFd(int fd, uint32_t events){
     int ret = epoll_ctl(m_epfd,EPOLL_CTL_MOD,fd,&event);
     if(ret != 0){
         //log here
-        Loger::getInstance()->Debug("error");
+        LOG_ERROR("modFd error");
     }
 }
 void Epoll::delFd(int fd){
     int ret = epoll_ctl(m_epfd,EPOLL_CTL_DEL,fd,NULL);
     if(ret != 0){
         //log here
+        LOG_ERROR("delFd error");
     }
 }
 

@@ -8,6 +8,8 @@
 #include"../helper/threadpool.h"
 #include"../http/http_conn.h"
 #include"../utils/loger.h"
+#include"../helper/sql_conn_pool.h"
+using namespace std;
 
 #define MAX_FD 65535
 class Server{
@@ -16,6 +18,7 @@ public:
     ~Server();
 
     void start();
+    void init(int sqlConnNum,string url,string user,string pwd,string DBName);
 private:
     int m_port;
     int m_listenfd;
@@ -25,8 +28,8 @@ private:
 
     std::shared_ptr<Epoll> m_epoll;
     ThreadPool<HttpConn> *m_threadpool;
-    std::shared_ptr<Loger> m_loger;
-
+    // ConnectionPool* m_connPool;
+    
     void _init();
     void _addClient(int fd, sockaddr_in addr);
     void _handleListen();

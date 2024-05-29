@@ -20,6 +20,7 @@
 #include "http_response.h"
 #include "../helper/epoll.h"
 #include "../utils/loger.h"
+#include "../helper/sql_conn_pool.h"
 
 class HttpConn
 {
@@ -29,7 +30,6 @@ public:
   static const int FILENAME_LEN = 200;
   // static std::set<std::string> m_file_set;
 
-  
   enum STATE
   {
     READ,

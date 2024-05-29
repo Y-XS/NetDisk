@@ -6,18 +6,25 @@
 #include <sys/stat.h>
 #include <iostream>
 #include<string.h>
-
 using namespace std;
 
-// #define LOG_DEBUG(format, ...) if(0 == m_close_log) {Log::get_instance()->write_log(0, format, ##__VA_ARGS__); Log::get_instance()->flush();}
-// #define LOG_INFO(format, ...) if(0 == m_close_log) {Log::get_instance()->write_log(1, format, ##__VA_ARGS__); Log::get_instance()->flush();}
-// #define LOG_WARN(format, ...) if(0 == m_close_log) {Log::get_instance()->write_log(2, format, ##__VA_ARGS__); Log::get_instance()->flush();}
-// #define LOG_ERROR(format, ...) if(0 == m_close_log) {Log::get_instance()->write_log(3, format, ##__VA_ARGS__); Log::get_instance()->flush();}
+#define LOG_DEBUG(format, ...) {Loger::getInstance()->writeLog(1, format, ##__VA_ARGS__);}
+#define LOG_INFO(format, ...) {Loger::getInstance()->writeLog(2, format, ##__VA_ARGS__);}
+#define LOG_WARN(format, ...) {Loger::getInstance()->writeLog(3, format, ##__VA_ARGS__);}
+#define LOG_ERROR(format, ...) {Loger::getInstance()->writeLog(4, format, ##__VA_ARGS__);}
 
 class Loger
 {
+private:
+    static Loger *m_instance;
+    Loger();
+
 public:
-    static Loger *getInstance() { return m_instance; }
+    static Loger* getInstance(){return m_instance;}
+    Loger(const Loger& loger) = delete;
+    // Loger(Loger* loger) = delete;
+    void operator = (const Loger& loger) = delete;
+
     enum LOG_LEVEL
     {
         TRACE,
@@ -33,26 +40,14 @@ public:
         TARGET_TERMINAL,
         TARGET_FILE_AND_TERMINAL
     };
-    Loger();
-    Loger(Loger *);
-    Loger(LOG_TARGET target, const char *path, int logKeepDays = 30);
-    ~Loger();
-
+    void writeLog(int level, const char *format, ...);
     void setTarget(LOG_TARGET target);
     void setPath(const char *path);
     void setKeepDays(int keepDays);
 
-    void Trace(const string &text);
-    void Debug(const string &text);
-    void Info(const string &text);
-    void Warn(const string &text);
-    void Error(const string &text);
-    void Fatal(const string &text);
     static string GetCurDay();
     void test();
-
 private:
-    static Loger *m_instance;
     const size_t m_maxFolderLen = 256;
     const int m_maxFileNameLen = 64;
     string m_logPath;
@@ -62,10 +57,12 @@ private:
     LOG_TARGET m_target;
     int m_logKeepDays = 0;
 
+    // Loger(Loger *);
+    // Loger(LOG_TARGET target, const char *path, int logKeepDays = 30);
+    // ~Loger();
     string _GetFormatTime();
     void _HandleOldLogs();
     void _ToFile(string text);
-    void _Output(const string &text, LOG_LEVEL level);
 };
 
 #endif

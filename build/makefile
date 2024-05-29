@@ -4,7 +4,7 @@ main = ../src/main.cpp
 inc = $(filter-out $(main), $(wildcard ../src/*/))
 include = $(addprefix -I, $(inc))
 
-args = -std=c++11 -Wall -g $(include) -lpthread
+args = -std=c++11 -Wall -g $(include) -lpthread -lmysqlclient -ldl -lssl -lcrypto -lresolv -lm -lrt
 all:server
 
 server: $(src)

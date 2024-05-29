@@ -1,6 +1,7 @@
 #include "http_conn.h"
 #include<assert.h>
 #include<dirent.h>
+#include"../controller/user_controller.h"
 
 int HttpConn::userCnt;
 string HttpConn::rootDir;
@@ -89,7 +90,7 @@ int HttpConn::doGet(){
     // cout<<m_file_name<<endl;
     int fd = open(m_file_name, O_RDONLY);
     if(fd<0){
-        Loger::getInstance()->Error("open file error!");
+        LOG_ERROR("open file error!");
         strcpy(res_root,rootDir.c_str());
         strcpy(m_file_name,strcat(res_root,"/404.html"));
         fd = open(m_file_name, O_RDONLY);
@@ -97,7 +98,7 @@ int HttpConn::doGet(){
     stat(m_file_name, &m_file_stat);
     m_file_address = (char*)mmap(0,m_file_stat.st_size,PROT_READ,MAP_PRIVATE, fd, 0);
     if(m_file_address == MAP_FAILED){
-        Loger::getInstance()->Error("mmap error!");
+        LOG_ERROR("mmap error!");
     }
     cout<<fd<<" "<<m_file_name<<" "<<m_file_stat.st_size<<endl;
     close(fd);
@@ -110,18 +111,23 @@ int HttpConn::doPost(){
     if(url.compare("/login")==0){
         //登录逻辑
         std::unordered_map<std::string, std::string> map = m_request.getPostParams();
-        if(map["userName"].compare("admin")==0 && map["password"].compare("123")==0){
-            cout<<"账号密码正确"<<endl;
-            retMsg = "登录成功！";
-        }else{
-            cout<<"用户名或密码错误"<<endl;
-            retMsg = "用户名或密码错误";
-        }
+        retMsg = login(map["userName"],map["password"]);
+        // if(map["userName"].compare("admin")==0 && map["password"].compare("123")==0){
+        //     cout<<"账号密码正确"<<endl;
+        //     retMsg = "登录成功！";
+        // }else{
+        //     cout<<"用户名或密码错误"<<endl;
+        //     retMsg = "用户名或密码错误";
+        // }
         strcpy(m_writeBuf,retMsg.c_str());
         m_writeInfo_len = retMsg.length();
     }
     else if(url.compare("/register")==0){
         //注册逻辑
+        std::unordered_map<std::string, std::string> map = m_request.getPostParams();
+        retMsg = userRegister(map["userName"],map["password"]);
+        strcpy(m_writeBuf,retMsg.c_str());
+        m_writeInfo_len = retMsg.length();
     }
 }
 
@@ -231,7 +237,7 @@ bool HttpConn::process()
     // 读
     if (m_state == STATE::READ)
     {
-        Loger::getInstance()->Debug("STATE::READ");
+        LOG_DEBUG("STATE::READ");
         int ret = readBuf();
         if (ret <= 0 && errno != EAGAIN)
         {
@@ -250,7 +256,7 @@ bool HttpConn::process()
     // 写
     else if (m_state == STATE::WRITE)
     {
-        Loger::getInstance()->Debug("STATE::WRITE");
+        LOG_DEBUG("STATE::WRITE");
         bool ret = writeBuf();
         if (!ret)
         {
@@ -266,10 +272,7 @@ void HttpConn::close_conn()
 {
     if (m_sockFd != -1)
     {
-        std::string info;
-        info.append("client ").append(getIP()).append(" quit.");
-        Loger::getInstance()->Info(info);
-
+        LOG_INFO("client %s quit.",getIP());
         Epoll::getInstance()->delFd(m_sockFd);
         close(m_sockFd);
         m_sockFd = -1;
