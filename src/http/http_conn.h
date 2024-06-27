@@ -8,7 +8,7 @@
 #include <sys/epoll.h>
 #include <string.h>
 #include <errno.h>
-#include<sys/sendfile.h>
+#include <sys/sendfile.h>
 #include <stdlib.h>
 #include <iostream>
 #include <sys/mman.h>
@@ -21,6 +21,7 @@
 #include "../helper/epoll.h"
 #include "../utils/loger.h"
 #include "../helper/sql_conn_pool.h"
+#include "../server/netdisk.h"
 
 class HttpConn
 {
@@ -59,7 +60,7 @@ private:
   int m_sockFd;
   struct sockaddr_in m_addr;
   STATE m_state;
-  static const int BUF_SIZE = 4096;
+  static const int BUF_SIZE = 2048;
   static const int HEADER_SIZE = 1024;
 
   char m_readBuf[BUF_SIZE];
@@ -77,9 +78,9 @@ private:
 
   HttpRequest m_request;
   HttpResponse m_response;
+  NetDisk m_netDisk;
 
   void init();
-  void getFileList();
   inline int getToWriteBytes(){return m_iov[0].iov_len+m_iov[1].iov_len;}
 };
 

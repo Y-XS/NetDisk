@@ -64,7 +64,6 @@ void Server::start(){
                 //服务端关闭连接，移除对应定时器
                 _closeConn(&m_users[sockfd]);
             }else if(events & EPOLLIN){
-                
                 _handleRead(&m_users[sockfd]);
             }else if(events & EPOLLOUT){
                 _handleWrite(&m_users[sockfd]);

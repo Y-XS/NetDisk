@@ -11,7 +11,8 @@
 #include"../helper/sql_conn_pool.h"
 using namespace std;
 
-#define MAX_FD 65535
+// #define MAX_FD 65535
+#define MAX_FD 20
 class Server{
 public:
     Server(int port);

@@ -15,6 +15,7 @@ bool HttpResponse::addStatusLine(int status, const char *title)
 bool HttpResponse::addHeaders(int content_len)
 {
     makeResponse("Content-Length:%d\r\n", content_len);
+    makeResponse("Access-Control-Allow-Origin:%s\r\n", "*");
     makeResponse("Connection:%s\r\n", m_request.getHeaders()["Connection"].c_str());
     makeResponse("%s", "\r\n");
     return true;

@@ -61,13 +61,14 @@ void HttpRequest::parse(std::string requestStr){
                 m_state = PARSE_STATE::BODY;
             }
             case PARSE_STATE::BODY:{
-                LOG_DEBUG("=====BODY======");
+                cout<<"=====BODY======"<<endl;
+                // LOG_DEBUG("=====BODY======");
                 if(m_bodySize == 0){
                     m_state = PARSE_STATE::COMPLEIE;
                     break;
                 }
                 m_body = requestStr.substr(requestStr.size() - m_bodySize, m_bodySize);
-                // cout<<"------m_body-----"<<m_body<<endl;
+                // cout<<"------m_body-----\n"<<m_body<<endl;
                 std::string tmp = m_body;
                 // cout<<"------tmp-----"<<tmp<<endl;
 
@@ -82,13 +83,14 @@ void HttpRequest::parse(std::string requestStr){
                     int pos = item.find("=");
                     std::string key = item.substr(0,pos);
                     std::string value = item.substr(pos+1,item.size());
-                    cout<<key<<" "<<value<<endl;
+                    // cout<<key<<" "<<value<<endl;
                     m_post_params[key] = value;
                 }
-                cout<<"m_post_params"<<endl;
-                for(auto it:m_post_params){
-                    cout<<it.first<<" "<<it.second<<endl;
-                }
+                // cout<<"m_post_params"<<endl;
+                // for(auto it:m_post_params){
+                //     cout<<it.first<<" "<<it.second<<endl;
+                // }
+
                 //神奇BUG
                 // int left = 0, right = 0,end = 0, flag=0;
                 // while(tmp.size()>0 && flag==0){

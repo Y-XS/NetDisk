@@ -1,6 +1,7 @@
 #include "http_conn.h"
 #include<assert.h>
 #include<dirent.h>
+#include <sstream>
 #include"../controller/user_controller.h"
 
 int HttpConn::userCnt;
@@ -21,27 +22,8 @@ HttpConn::HttpConn()
     memset(m_resp_header, '\0', HEADER_SIZE);
     memset(m_file_name, '\0', FILENAME_LEN);
 }
-void HttpConn::getFileList(){
-    // cout<<"*****getFileList*****"<<endl;
-    // DIR* pDir;
-    // struct dirent* ptr;
-    // if(!(pDir = opendir("./res"))){
-    //     Loger::getInstance()->Debug("Folder doesn't exist!");
-    //     return;
-    // }
-    // while((ptr = readdir(pDir))!=0){
-    //     if(strcmp(ptr->d_name,".")!=0 && strcmp(ptr->d_name,"..")!=0){
-    //         m_file_set.insert(ptr->d_name);
-    //     }
-    // }
-    // for(auto file:m_file_set){
-    //     cout<<file<<endl;
-    // }
-    // closedir(pDir);
-}
 void HttpConn::init(int sockfd, const sockaddr_in &addr)
 {
-    // getFileList();
     this->m_sockFd = sockfd;
     this->m_addr = addr;
     userCnt++;
@@ -111,16 +93,15 @@ int HttpConn::doPost(){
     if(url.compare("/login")==0){
         //登录逻辑
         std::unordered_map<std::string, std::string> map = m_request.getPostParams();
-        retMsg = login(map["userName"],map["password"]);
-        // if(map["userName"].compare("admin")==0 && map["password"].compare("123")==0){
-        //     cout<<"账号密码正确"<<endl;
-        //     retMsg = "登录成功！";
-        // }else{
-        //     cout<<"用户名或密码错误"<<endl;
-        //     retMsg = "用户名或密码错误";
-        // }
-        strcpy(m_writeBuf,retMsg.c_str());
-        m_writeInfo_len = retMsg.length();
+        JSON json;
+        json["username"]=map["username"];
+        json["password"]=map["password"];
+        cout<<json<<endl;
+        string retJsonStr = m_netDisk.login(json.dump());
+        cout<<retJsonStr<<endl;
+
+        strcpy(m_writeBuf,retJsonStr.c_str());
+        m_writeInfo_len = retJsonStr.length();
     }
     else if(url.compare("/register")==0){
         //注册逻辑
@@ -128,12 +109,99 @@ int HttpConn::doPost(){
         retMsg = userRegister(map["userName"],map["password"]);
         strcpy(m_writeBuf,retMsg.c_str());
         m_writeInfo_len = retMsg.length();
+    }else if(url.compare("/getFileList")==0){
+        std::unordered_map<std::string, std::string> map = m_request.getPostParams();
+        string retJsonStr = m_netDisk.getFileList(map["dir"]);
+        strcpy(m_writeBuf,retJsonStr.c_str());
+        m_writeInfo_len = retJsonStr.length();
+    }else if(url.compare("/mkdir")==0){
+        std::unordered_map<std::string, std::string> map = m_request.getPostParams();
+        string retJsonStr = m_netDisk.mkDIR(map["dir"]);
+        strcpy(m_writeBuf,retJsonStr.c_str());
+        m_writeInfo_len = retJsonStr.length();
+    }else if(url.compare("/upload")==0){
+        cout<<"upload-----"<<endl;
+        
+        // cout<<"body="<<endl;
+        // cout<<m_request.getBody()<<endl;
+
+        auto headers = m_request.getHeaders();
+        string contentType = headers["Content-Type"];
+        string boundary = contentType.substr(contentType.find("boundary=")+9,contentType.length());
+        cout<<"boundary="<<boundary<<endl;
+
+
+        string sbody = m_request.getBody();
+        string searchStr;
+        int pos = 0;
+        int sPos = 0,ePos = 0;
+        int fsPos = 0,fePos = 0;
+        int startPos = 0,endPos=0;
+        int bodyLen = sbody.length();
+        int boundaryLen = boundary.length();
+        string fileName;
+        string retJsonStr;
+        cout<<sbody<<endl;
+        unordered_map<string,string> map;
+        searchStr = sbody;
+        while(1){
+            // cout<<"============================="<<endl;
+            pos = searchStr.find("--"+boundary) +2+boundary.length()+2;
+            searchStr = searchStr.substr(pos,searchStr.length()-pos);
+            //解析结束，退出循环
+            if(searchStr.length() == 2)
+                break;
+            sPos = searchStr.find("name=\"")+6;
+            ePos = sPos;
+            //属性
+            if(searchStr.at(ePos)!='\"'){
+                string name = searchStr.substr(sPos,searchStr.find("\r\n\r\n")-1-sPos);
+                startPos = searchStr.find("\r\n\r\n")+4;
+                endPos = searchStr.find("--"+boundary)-2;
+                string value = searchStr.substr(startPos,endPos-startPos);
+                map[name] = value;
+                cout<<name<<" "<<value<<endl;
+            }
+            //文件
+            else{
+                sPos = searchStr.find("filename=\"")+10;
+                ePos = searchStr.find("Content-Type")-3;
+                fileName = searchStr.substr(sPos,ePos-sPos);
+                startPos = searchStr.find("\r\n\r\n")+4;
+                endPos = searchStr.find("--"+boundary)-2;
+                // cout<<map["dir"]<<" "<<fileName<<" "<<startPos<<" "<<endPos<<endl;
+                retJsonStr = m_netDisk.upload(searchStr.c_str()+startPos,endPos-startPos,map["dir"],fileName);
+            }
+            pos = endPos;
+            // cout<<"********************************"<<endl;
+        }
+        strcpy(m_writeBuf,retJsonStr.c_str());
+        m_writeInfo_len = retJsonStr.length();
+    }else if(url.compare("/delFile")==0){
+        JSON retJson;
+        int cnt;
+        JSON delFileList = JSON::parse(m_request.getBody());
+        for(auto item:delFileList){
+            if(m_netDisk.delFile(item)!=0)
+                ++cnt;
+        }
+        if(cnt!=0){
+            retJson["code"]=-1;
+            retJson["msg"]="文件删除失败！";
+            retJson["cnt"]=cnt;
+        }else{
+            retJson["code"]=0;
+            retJson["msg"]="文件删除成功！";
+        }
+        strcpy(m_writeBuf,retJson.dump().c_str());
+        m_writeInfo_len = retJson.dump().length();
     }
 }
 
 int HttpConn::doRequest()
 {
     string method = m_request.getMethod();
+    cout<<"method="<<method<<endl;
     if(method.compare("GET")==0){
         doGet();
         return 0;

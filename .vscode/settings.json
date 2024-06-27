@@ -45,6 +45,9 @@
         "typeinfo": "cpp",
         "string": "cpp",
         "regex": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "valarray": "cpp"
     }
 }
